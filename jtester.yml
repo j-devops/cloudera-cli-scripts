@@ -1,0 +1,11 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: all
+
+  vars_files:
+  - var.yml
+
+  gather_facts: true
+
+  tasks:
+    - include: kernel_tweaker.yml

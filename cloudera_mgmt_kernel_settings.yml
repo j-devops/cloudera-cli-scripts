@@ -1,0 +1,29 @@
+---
+  - name: Set values in sysctl.conf
+    sysctl: name={{ item.name }} value={{ item.value }} state=present
+    with_items:
+    - { name: net.ipv4.tcp_adv_win_scale, value: 1 }
+    - { name: net.ipv4.tcp_timestamps, value: 0 }
+    - { name: net.ipv4.tcp_sack, value: 0 }
+    - { name: net.core.netdev_max_backlog, value: 250000 }
+    - { name: net.core.rmem_max, value: 16777216 }
+    - { name: net.core.wmem_max, value: 16777216 }
+    - { name: net.core.rmem_default, value: 16777216 }
+    - { name: net.core.wmem_default, value: 16777216 }
+    - { name: net.core.optmem_max, value: 16777216 }
+    - { name: net.ipv4.tcp_low_latency, value: 1 }
+    - { name: vm.swappiness, value: 1 }
+
+  - name: turn off transparent huge pages during boot
+    lineinfile: dest=/etc/rc.local line="echo never > /sys/kernel/mm/redhat_transparent_hugepage/enabled"
+
+  - name: turn off transparent huge pages during boot
+    lineinfile: dest=/etc/rc.local line="echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag"
+
+  - name: disable hugepage
+    lineinfile: dest=/etc/rc.local line="echo never > /sys/kernel/mm/redhat_transparent_hugepage/khugepaged/defrag"
+
+  - name: apply tweaks to running kernel
+    shell: echo never > /sys/kernel/mm/redhat_transparent_hugepage/enabled
+  - shell: echo never > /sys/kernel/mm/redhat_transparent_hugepage/defrag
+  - shell: echo no > /sys/kernel/mm/redhat_transparent_hugepage/khugepaged/defrag

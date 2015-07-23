@@ -1,0 +1,6 @@
+#kerberos setup
+realm: JLAN.COM
+kdc: c0
+admin_server: c0
+krb_password: Cray!23
+prin_password: Cray!23

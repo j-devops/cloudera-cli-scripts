@@ -1,0 +1,35 @@
+---
+- hosts: dn
+
+  vars_files:
+  - var.yml
+
+  gather_facts: true
+
+  tasks:
+  - name: modprob bridge to get around redhat bug
+    shell: modprobe bridge
+
+  - name: Set values in sysctl.conf
+    sysctl: name={{ item.name }} value={{ item.value }} state=present
+    with_items:
+    - { name: net.ipv4.tcp_timestamps, value: 0 }
+    - { name: net.ipv4.tcp_sack, value: 0 }
+    - { name: net.core.netdev_max_backlog, value: 250000 }
+    - { name: net.core.rmem_max, value: 16777216 }
+    - { name: net.core.wmem_max, value: 16777216 }
+    - { name: net.core.rmem_default, value: 16777216 }
+    - { name: net.core.wmem_default, value: 16777216 }
+    - { name: net.core.optmem_max, value: 16777216 }
+    - { name: net.ipv4.tcp_low_latency, value: 1 }
+    - { name: vm.swappiness, value: 1 }
+
+  - name: Set noatime on DN
+    mount: name=/ src=/dev/xvde fstype=ext4 opts=rw,noatime,discard passno=0 state=mounted
+
+  - name: Set res space for root to 0
+    shell: tune2fs -m 0 /dev/xvde
+
+  - name: start nscd on computes
+    service: name=nscd enabled=yes state=restarted
+

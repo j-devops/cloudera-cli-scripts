@@ -1,0 +1,75 @@
+---
+- hosts: mgmt
+
+  vars_files:
+  - var.yml
+
+  tasks:
+
+  - name: Install keberos client packages
+    action: yum pkg={{item}} state=present
+    with_items:
+    - krb5-libs
+    - krb5-workstation
+    - krb5-server
+
+  - name: copy kdc file
+    copy: src=kdc.conf dest=/var/kerberos/krb5kdc/kdc.conf
+      owner=root group=root mode=0644
+
+  - name: delete current krb database
+    shell: kdb5_util destroy -f
+    ignore_errors: true
+
+  - name: create a password file to load into kr
+    shell: echo {{krb_password}} > /tmp/krb_pass
+  - shell: echo {{krb_password}} >> /tmp/krb_pass
+
+  - name: create kerberos database
+    shell: kdb5_util create -s < /tmp/krb_pass
+
+  - name: modify kdc
+    lineinfile: dest=/var/kerberos/krb5kdc/kadm5.acl regexp='admin' line='"*/admin@JLAN.COM *"'
+
+  - name: create a password file to load into kr
+    shell: echo {{prin_password}} > /tmp/prin_pass
+  - shell: echo {{prin_password}} >> /tmp/prin_pass
+
+  - name: create krb database
+    shell: kadmin.local -q "addprinc crayadm/admin" < /tmp/prin_pass
+
+  - name: restart kerberos server
+    service: name=krb5kdc state=restarted
+  - service: name=kadmin state=restarted
+
+  - name: enable kerberos on boot
+    service: name=krb5kdc enabled=yes
+  - service: name=kadmin enabled=yes
+
+  - name: create cmf.principal
+    shell: echo "cloudera-scm/admin@JLAN.COM" > /tmp/cmf.principal
+  - shell: chown cloudera-scm:cloudera-scm /tmp/cmf.principal
+  - shell: chmod 0600 /tmp/cmf.principal
+  - shell: cp -p /tmp/cmf.principal /etc/cloudera-scm-server/cmf.principal
+
+  - name: create a script file to run for kadmin
+    shell: echo {{prin_password}} > /tmp/kadmin
+  - shell: echo "addprinc hdfs@URIKA-XA.COM" >> /tmp/kadmin
+  - shell: echo {{prin_password}} >> /tmp/kadmin
+  - shell: echo {{prin_password}} >> /tmp/kadmin
+  - shell: echo exit >> /tmp/kadmin
+
+  - name: create hdfs princ
+    shell: kadmin -p  crayadm/admin < /tmp/kadmin
+
+  - name: create default user test
+    shell: echo {{prin_password}} > /tmp/kadmin
+  - shell: echo "addprinc urika@URIKA-XA.COM" >> /tmp/kadmin
+  - shell: echo test >> /tmp/kadmin
+  - shell: echo test >> /tmp/kadmin
+  - shell: echo exit >> /tmp/kadmin
+
+  - name: create urika princ
+    shell: kadmin -p  crayadm/admin < /tmp/kadmin
+
+
