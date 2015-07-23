@@ -1,0 +1,2 @@
+# cloudera
+misc cloudera scripts
