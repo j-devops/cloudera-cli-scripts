@@ -11,6 +11,8 @@
     with_items:
     - mysql
     - epel-release
+    - libselinux-python
     - mlocate
     - wget
+    - oracle-j2sdk1.7
 

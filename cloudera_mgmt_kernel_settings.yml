@@ -1,4 +1,12 @@
 ---
+- hosts: dn
+
+  vars_files:
+  - var.yml
+
+  gather_facts: true
+
+  tasks:
   - name: Set values in sysctl.conf
     sysctl: name={{ item.name }} value={{ item.value }} state=present
     with_items:

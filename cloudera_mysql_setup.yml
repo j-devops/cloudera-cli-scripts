@@ -1,0 +1,22 @@
+---
+- hosts: mgmt
+
+  vars_files:
+  - var.yml
+
+  tasks:
+
+  - name: Install keberos client packages
+    action: yum pkg={{item}} state=present
+    with_items:
+    - mysql-server
+
+  - name: copy mycnf file
+    copy: src=my.cnf dest=/etc/my.cnf
+
+  - name: chwon
+    shell: chown mysql /var/lib/mysql/ -R
+
+#mysql install db  
+#mysql_install_db
+#mysql_secure_installation

@@ -1,0 +1,15 @@
+---
+- hosts: all
+
+  vars_files:
+  - var.yml
+
+  gather_facts: true
+
+  tasks:
+
+  - shell: iptables --flush
+  - shell: service iptables stop
+  - shell: chkconfig iptables off
+  - shell: setenforce 0
+  - lineinfile: dest=/etc/sysconfig/selinux regexp='SELINUX=enforcing' line='"SELINUX=disabled"'
